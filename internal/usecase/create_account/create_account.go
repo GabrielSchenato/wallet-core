@@ -9,7 +9,7 @@ type CreateAccountInputDTO struct {
 	ClientID string
 }
 
-type CreateAccountIOutputtDTO struct {
+type CreateAccountOutputDTO struct {
 	ID string
 }
 
@@ -25,7 +25,7 @@ func NewCreateAccountUseCase(AccountGateway gateway.AccountGateway, ClientGatewa
 	}
 }
 
-func (uc *CreateAccountUseCase) Execute(input CreateAccountInputDTO) (*CreateAccountIOutputtDTO, error) {
+func (uc *CreateAccountUseCase) Execute(input CreateAccountInputDTO) (*CreateAccountOutputDTO, error) {
 	client, err := uc.ClientGateway.Get(input.ClientID)
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func (uc *CreateAccountUseCase) Execute(input CreateAccountInputDTO) (*CreateAcc
 	if err != nil {
 		return nil, err
 	}
-	return &CreateAccountIOutputtDTO{
+	return &CreateAccountOutputDTO{
 		ID: account.ID,
 	}, nil
 }

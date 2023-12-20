@@ -12,7 +12,7 @@ type CreateClientInputDTO struct {
 	Email string
 }
 
-type CreateClientIOutputtDTO struct {
+type CreateClientOutputDTO struct {
 	ID        string
 	Name      string
 	Email     string
@@ -30,7 +30,7 @@ func NewCreateClientUseCase(clientGateway gateway.ClientGateway) *CreateClientUs
 	}
 }
 
-func (uc *CreateClientUseCase) Execute(input CreateClientInputDTO) (*CreateClientIOutputtDTO, error) {
+func (uc *CreateClientUseCase) Execute(input CreateClientInputDTO) (*CreateClientOutputDTO, error) {
 	client, err := entity.NewClient(input.Name, input.Email)
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func (uc *CreateClientUseCase) Execute(input CreateClientInputDTO) (*CreateClien
 	if err != nil {
 		return nil, err
 	}
-	return &CreateClientIOutputtDTO{
+	return &CreateClientOutputDTO{
 		ID:        client.ID,
 		Name:      client.Name,
 		Email:     client.Email,
