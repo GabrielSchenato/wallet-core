@@ -9,46 +9,49 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type ClientDBTestSuite struct {
+type AccountDBTestSuite struct {
 	suite.Suite
-	db       *sql.DB
-	clientDB *ClientDB
+	db        *sql.DB
+	accountDB *AccountDB
+	client    *entity.Client
 }
 
-func (s *ClientDBTestSuite) SetupSuite() {
+func (s *AccountDBTestSuite) SetupSuite() {
 	db, err := sql.Open("sqlite3", ":memory:")
 	s.Nil(err)
 	s.db = db
 	db.Exec("CREATE TABLE clients (id varchar(255), name varchar(255), email varchar(255), created_at date)")
-	s.clientDB = NewClientDB(db)
+	db.Exec("CREATE TABLE accounts (id varchar(255), client_id varchar(255), balance int, created_at date)")
+	s.accountDB = NewAccountDB(db)
+	s.client, _ = entity.NewClient("John Doe", "j@j.com")
 }
 
-func (s *ClientDBTestSuite) TearDownSuite() {
+func (s *AccountDBTestSuite) TearDownSuite() {
 	defer s.db.Close()
 	s.db.Exec("DROP TABLE clients")
+	s.db.Exec("DROP TABLE accounts")
 }
 
-func TestClientDBTestSuite(t *testing.T) {
-	suite.Run(t, new(ClientDBTestSuite))
+func TestAccountDBTestSuite(t *testing.T) {
+	suite.Run(t, new(AccountDBTestSuite))
 }
 
-func (s *ClientDBTestSuite) TestSave() {
-	client := &entity.Client{
-		ID:    "1",
-		Name:  "John Doe",
-		Email: "j@j.com",
-	}
-	err := s.clientDB.Save(client)
+func (s *AccountDBTestSuite) TestSave() {
+	account := entity.NewAccount(s.client)
+	err := s.accountDB.Save(account)
 	s.Nil(err)
 }
 
-func (s *ClientDBTestSuite) TestGet() {
-	client, _ := entity.NewClient("John Doe", "j@j.com")
-	s.clientDB.Save(client)
+func (s *AccountDBTestSuite) TestFindByID() {
+	s.db.Exec("INSERT INTO clients (id, name, email, created_at) VALUES (?, ?, ?, ?)",
+		s.client.ID, s.client.Name, s.client.Email, s.client.CreatedAt,
+	)
 
-	clientDB, err := s.clientDB.Get(client.ID)
+	account := entity.NewAccount(s.client)
+	err := s.accountDB.Save(account)
 	s.Nil(err)
-	s.Equal(client.ID, clientDB.ID)
-	s.Equal(client.Name, clientDB.Name)
-	s.Equal(client.Email, clientDB.Email)
+	accountDB, err := s.accountDB.FindByID(account.ID)
+	s.Nil(err)
+	s.Equal(account.ID, accountDB.ID)
+	s.Equal(account.Client.ID, accountDB.Client.ID)
 }
