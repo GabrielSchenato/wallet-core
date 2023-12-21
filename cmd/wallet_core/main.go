@@ -1,4 +1,4 @@
-package walletcore
+package wallet_core
 
 import (
 	"database/sql"
@@ -6,9 +6,9 @@ import (
 
 	"github.com.br/GabrielSchenato/wallet-core/internal/database"
 	"github.com.br/GabrielSchenato/wallet-core/internal/event"
-	createaccount "github.com.br/GabrielSchenato/wallet-core/internal/usecase/create_account"
-	createclient "github.com.br/GabrielSchenato/wallet-core/internal/usecase/create_client"
-	createtransaction "github.com.br/GabrielSchenato/wallet-core/internal/usecase/create_transaction"
+	"github.com.br/GabrielSchenato/wallet-core/internal/usecase/create_account"
+	"github.com.br/GabrielSchenato/wallet-core/internal/usecase/create_client"
+	"github.com.br/GabrielSchenato/wallet-core/internal/usecase/create_transaction"
 	"github.com.br/GabrielSchenato/wallet-core/pkg/events"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -30,8 +30,8 @@ func main() {
 	accountDB := database.NewAccountDB(db)
 	transactionDB := database.NewTransactionDB(db)
 
-	createClientUseCase := createclient.NewCreateClientUseCase(clientDB)
-	createAccountUseCase := createaccount.NewCreateAccountUseCase(accountDB, clientDB)
-	createTransactionUseCase := createtransaction.NewCreateTransactionUseCase(transactionDB, accountDB, eventDispatcher, transactionCreatedEvent)
+	createClientUseCase := create_client.NewCreateClientUseCase(clientDB)
+	createAccountUseCase := create_account.NewCreateAccountUseCase(accountDB, clientDB)
+	createTransactionUseCase := create_transaction.NewCreateTransactionUseCase(transactionDB, accountDB, eventDispatcher, transactionCreatedEvent)
 
 }
