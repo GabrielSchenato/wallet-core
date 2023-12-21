@@ -18,10 +18,10 @@ type CreateAccountUseCase struct {
 	ClientGateway  gateway.ClientGateway
 }
 
-func NewCreateAccountUseCase(AccountGateway gateway.AccountGateway, ClientGateway gateway.ClientGateway) *CreateAccountUseCase {
+func NewCreateAccountUseCase(accountGateway gateway.AccountGateway, clientGateway gateway.ClientGateway) *CreateAccountUseCase {
 	return &CreateAccountUseCase{
-		AccountGateway: AccountGateway,
-		ClientGateway:  ClientGateway,
+		AccountGateway: accountGateway,
+		ClientGateway:  clientGateway,
 	}
 }
 
