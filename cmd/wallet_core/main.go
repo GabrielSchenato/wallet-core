@@ -9,6 +9,8 @@ import (
 	"github.com.br/GabrielSchenato/wallet-core/internal/usecase/create_account"
 	"github.com.br/GabrielSchenato/wallet-core/internal/usecase/create_client"
 	"github.com.br/GabrielSchenato/wallet-core/internal/usecase/create_transaction"
+	"github.com.br/GabrielSchenato/wallet-core/internal/web"
+	"github.com.br/GabrielSchenato/wallet-core/internal/web/webserver"
 	"github.com.br/GabrielSchenato/wallet-core/pkg/events"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -34,4 +36,14 @@ func main() {
 	createAccountUseCase := create_account.NewCreateAccountUseCase(accountDB, clientDB)
 	createTransactionUseCase := create_transaction.NewCreateTransactionUseCase(transactionDB, accountDB, eventDispatcher, transactionCreatedEvent)
 
+	webserver := webserver.NewWebServer(":3000")
+	clientHandler := web.NewWebClientHandler(*createClientUseCase)
+	accounttHandler := web.NewWebAccountHandler(*createAccountUseCase)
+	transactionHandler := web.NewWebTransactionHandler(*createTransactionUseCase)
+
+	webserver.AddHandler("/clients", clientHandler.CreateClient)
+	webserver.AddHandler("/accounts", accounttHandler.CreateAccount)
+	webserver.AddHandler("/transactions", transactionHandler.CreateTransaction)
+
+	webserver.Start()
 }
