@@ -27,7 +27,7 @@ func (h *WebAccountHandler) CreateAccount(w http.ResponseWriter, r *http.Request
 
 	output, err := h.CreateAccountUseCase.Execute(dto)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
