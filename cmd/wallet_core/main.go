@@ -7,13 +7,16 @@ import (
 
 	"github.com.br/GabrielSchenato/wallet-core/internal/database"
 	"github.com.br/GabrielSchenato/wallet-core/internal/event"
+	"github.com.br/GabrielSchenato/wallet-core/internal/event/handler"
 	"github.com.br/GabrielSchenato/wallet-core/internal/usecase/create_account"
 	"github.com.br/GabrielSchenato/wallet-core/internal/usecase/create_client"
 	"github.com.br/GabrielSchenato/wallet-core/internal/usecase/create_transaction"
 	"github.com.br/GabrielSchenato/wallet-core/internal/web"
 	"github.com.br/GabrielSchenato/wallet-core/internal/web/webserver"
 	"github.com.br/GabrielSchenato/wallet-core/pkg/events"
+	"github.com.br/GabrielSchenato/wallet-core/pkg/kafka"
 	"github.com.br/GabrielSchenato/wallet-core/pkg/uow"
+	ckafka "github.com/confluentinc/confluent-kafka-go/kafka"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -26,9 +29,15 @@ func main() {
 
 	defer db.Close()
 
+	configMap := ckafka.ConfigMap{
+		"bootstrap.servers": "kafka:29092",
+		"group.id":          "wallet",
+	}
+	kafkaProducer := kafka.NewKafkaProducer(&configMap)
+
 	eventDispatcher := events.NewEventDispatcher()
+	eventDispatcher.Register("TransactionCreated", handler.NewTransactionCreatedKafkaHandler(kafkaProducer))
 	transactionCreatedEvent := event.NewTransactionCreated()
-	//eventDispatcher.Register("TransactionCreated", handler)
 
 	clientDB := database.NewClientDB(db)
 	accountDB := database.NewAccountDB(db)
@@ -48,7 +57,7 @@ func main() {
 	createAccountUseCase := create_account.NewCreateAccountUseCase(accountDB, clientDB)
 	createTransactionUseCase := create_transaction.NewCreateTransactionUseCase(uow, eventDispatcher, transactionCreatedEvent)
 
-	webserver := webserver.NewWebServer(":3000")
+	webserver := webserver.NewWebServer(":8080")
 	clientHandler := web.NewWebClientHandler(*createClientUseCase)
 	accounttHandler := web.NewWebAccountHandler(*createAccountUseCase)
 	transactionHandler := web.NewWebTransactionHandler(*createTransactionUseCase)
@@ -57,5 +66,6 @@ func main() {
 	webserver.AddHandler("/accounts", accounttHandler.CreateAccount)
 	webserver.AddHandler("/transactions", transactionHandler.CreateTransaction)
 
+	fmt.Println("Server is running")
 	webserver.Start()
 }

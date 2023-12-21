@@ -3,6 +3,7 @@ version: '3'
 services:
   goapp:
     build: .
+    platform: linux/amd64
     volumes:
       - .:/app
     ports:
